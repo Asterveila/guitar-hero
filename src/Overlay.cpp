@@ -185,7 +185,7 @@ bool Overlay::init() {
                 }
 
                 // if (!down || m_pathsAvailable[path] || m_pathsAvailable == std::array{false, false, false, false}) {
-                if (!down || m_pathsAvailable[path] || getSetting<"any-key", bool>()) {
+                if (!down || m_pathsAvailable[path] || (getSetting<"any-key", bool>() && m_pathsAvailable != std::array{false, false, false, false})) {
                     auto f = static_cast<ProPlayLayer*>(m_playLayer)->m_fields.self();
 
                     f->dontIgnore = true;
@@ -195,9 +195,26 @@ bool Overlay::init() {
                     f->dontIgnore = false;
                 }
 
-                m_paths[path]->setGlowing(down);
-                m_hitButtons[path]->setPressed(down);
                 m_pathsPressing[path] = down;
+
+                if (getSetting<"any-key", bool>()) {
+                    auto pressingAnything = false;
+
+                    for (auto pressing : m_pathsPressing) {
+                        if (pressing) {
+                            pressingAnything = true;
+                            break;
+                        }   
+                    }
+                    
+                    for (int i = 0; i < 4; i++) {
+                        m_paths[i]->setGlowing(pressingAnything);
+                        m_hitButtons[i]->setPressed(pressingAnything);
+                    }
+                } else {
+                    m_paths[path]->setGlowing(down);
+                    m_hitButtons[path]->setPressed(down);
+                }
             }
         );
     }
@@ -246,6 +263,19 @@ void Overlay::update(float dt) {
 
         auto killing = m_killablePaths[node->getPath()] && m_pathsPressing[node->getPath()];
 
+        if (getSetting<"any-key", bool>()) {
+            auto pressingAnything = false;
+
+            for (auto pressing : m_pathsPressing) {
+                if (pressing) {
+                    pressingAnything = true;
+                    break;
+                }   
+            }
+
+            killing = m_killablePaths[node->getPath()] && pressingAnything;
+        }
+        
         node->setGlowing(shouldKill && m_pathsPressing[node->getPath()]);
 
         auto particle = m_particles[node->getPath()];
@@ -310,10 +340,10 @@ void Overlay::loadGame(const std::vector<gdr::Input<>>& inputs, float offset) {
     bool hasPrev = false;
 
     for (const auto& input : inputs) {
-        if (input.player2) {
-            continue;
-        }
-        
+        // if (input.player2) {
+        //     continue;
+        // }
+
         seed += input.frame;
 
         const bool down = input.down;
