@@ -451,6 +451,14 @@ void Overlay::completed() {
     }
 }
 
+void Overlay::tap(bool down) {
+    for (int i = 0; i < 4; i++) {
+        m_paths[i]->setGlowing(down);
+        m_hitButtons[i]->setPressed(down);
+        m_pathsPressing[i] = down;
+    }
+}
+
 void Overlay::fadeOut(CCNode* node) {
     for (auto child : node->getChildrenExt<CCNodeRGBA*>()) {
         if (typeinfo_cast<CCNodeRGBA*>(child) || typeinfo_cast<CCLayerRGBA*>(child)) {

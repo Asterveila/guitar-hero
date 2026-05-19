@@ -40,6 +40,7 @@ public:
     void resetGame(float);
     void died();
     void completed();
+    void tap(bool);
     
     void update(float) override;
     void setOpacity(GLubyte) override;
