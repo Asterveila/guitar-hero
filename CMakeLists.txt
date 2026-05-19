@@ -22,6 +22,7 @@ endif()
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
 CPMAddPackage("gh:maxnut/GDReplayFormat#2a0ca3c")
+CPMAddPackage("gh:prevter/msgpack-for-matjson#12edd5a")
 CPMAddPackage("gh:maxnut/GDR-converter#71104a9")
 
 target_link_libraries(${PROJECT_NAME} libGDR GDRconverter)
