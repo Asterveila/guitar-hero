@@ -185,7 +185,7 @@ bool Overlay::init() {
                 }
 
                 // if (!down || m_pathsAvailable[path] || m_pathsAvailable == std::array{false, false, false, false}) {
-                if (!down || m_pathsAvailable[path]) {
+                if (!down || m_pathsAvailable[path] || getSetting<"any-key", bool>()) {
                     auto f = static_cast<ProPlayLayer*>(m_playLayer)->m_fields.self();
 
                     f->dontIgnore = true;

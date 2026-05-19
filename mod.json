@@ -39,22 +39,33 @@
 		"blue-key": {
 			"type": "keybind",
 			"name": "Blue Key",
-			"default": "G"
+			"default": "Left"
 		},
 		"yellow-key": {
 			"type": "keybind",
 			"name": "Yellow Key",
-			"default": "H"
+			"default": "Up"
 		},
 		"red-key": {
 			"type": "keybind",
 			"name": "Red Key",
-			"default": "J"
+			"default": "Right"
 		},
 		"green-key": {
 			"type": "keybind",
 			"name": "Green Key",
-			"default": "K"
+			"default": "Down"
+		},
+		"any-key": {
+			"name": "Any Key Works",
+			"description": "Makes any key work as an input",
+			"type": "bool",
+			"default": {
+				"android": true,
+				"win": false,
+				"mac": false,
+				"ios": true
+			}
 		},
 		"only-once": {
 			"name": "Only Start Once",
