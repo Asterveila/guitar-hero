@@ -180,11 +180,12 @@ bool Overlay::init() {
         this->addEventListener(
             KeybindSettingPressedEventV3(Mod::get(), key),
             [this, path](Keybind const& keybind, bool down, bool repeat, double timestamp) {
-                if (repeat) {
+                if (repeat || m_completed) {
                     return;
                 }
 
-                if (!down || m_pathsAvailable[path] || m_pathsAvailable == std::array{false, false, false, false}) {
+                // if (!down || m_pathsAvailable[path] || m_pathsAvailable == std::array{false, false, false, false}) {
+                if (!down || m_pathsAvailable[path]) {
                     auto f = static_cast<ProPlayLayer*>(m_playLayer)->m_fields.self();
 
                     f->dontIgnore = true;
@@ -201,6 +202,9 @@ bool Overlay::init() {
         );
     }
 
+    m_ded = CCLayerColor::create({150, 0, 0, 0});
+
+    this->addChild(m_ded);
     this->setOpacity(getSetting<"overlay-opacity", int>());
 
     return true;
@@ -211,7 +215,7 @@ void Overlay::update(float dt) {
         return;
     }
 
-    if (m_dead) {
+    if (m_dead || m_completed) {
         m_timeDead += dt;
     }
 
@@ -223,7 +227,11 @@ void Overlay::update(float dt) {
             continue;
         }
 
-        node->setPositionY(node->getPositionY() - (60.f * getSetting<"speed", float>()) * dt);
+        node->setPositionY(node->getPositionY() - (60.f * getSetting<"speed", float>()) * dt * (1.f - std::min(m_timeDead / 0.65f, 1.f)));
+
+        if (m_completed) {
+            return;
+        }
 
         if (node->getPositionY() - node->getContentHeight() < 62.f && node->getPositionY() > 40.f) {
             m_pathsAvailable[node->getPath()] = true;
@@ -267,7 +275,7 @@ void Overlay::update(float dt) {
             path->stopAllActions();
             path->setError(false);
 
-            queueInMainThread([this, path, node] {
+            queueInMainThread([this, path, node, _ = Ref(this)] {
                 path->setPosition(m_pathPositions[node->getPath()]);
             });
         }
@@ -278,15 +286,17 @@ void Overlay::update(float dt) {
     }
 }
 
-void Overlay::loadGame(const std::vector<gdr::Input<>>& inputs) {
+void Overlay::loadGame(const std::vector<gdr::Input<>>& inputs, float offset) {
     for (auto node : m_nodes) {
         node->removeFromParent();
     }
 
     m_nodes.clear();
 
+    auto seed = EditorIDs::getID(m_playLayer->m_level) + inputs.size() + getSetting<"seed-offset", int>();
+
     this->setVisible(true);
-    this->scheduleUpdate();
+    // this->scheduleUpdate();
 
     struct Input {
         uint64_t frame;
@@ -303,6 +313,8 @@ void Overlay::loadGame(const std::vector<gdr::Input<>>& inputs) {
         if (input.player2) {
             continue;
         }
+        
+        seed += input.frame;
 
         const bool down = input.down;
 
@@ -337,12 +349,13 @@ void Overlay::loadGame(const std::vector<gdr::Input<>>& inputs) {
         prevDown = down;
     }
 
+    auto generator = random::Generator(seed);
+
     for (const auto& input : cleanInputs) {
-        auto idx = random::generate<int>(0, 4);
+        auto idx = generator.generate<int>(0, 4);
         auto parent = m_paths[idx];
         auto color = std::array{ccColor3B{ 55, 180, 230 }, ccColor3B{ 221, 210, 52 }, ccColor3B{241, 60, 62}, ccColor3B{ 102, 224, 54 }}[idx];
-        auto height = input.duration / 4.f * getSetting<"speed", float>();
-        // auto height = std::max(static_cast<float>(input.duration / 4.f) + 17.f, 17.f);
+        auto height = input.duration / 4.f * getSetting<"speed", float>() + 17.f;
 
         auto node = InputNode::create(color, height, input.frame, idx);
         node->setPositionX(parent->getContentWidth() / 2.f);
@@ -351,17 +364,21 @@ void Overlay::loadGame(const std::vector<gdr::Input<>>& inputs) {
         m_nodes.push_back(node);
     }
 
-    this->resetGame(0.f);
+    this->resetGame(offset);
 }
 
 void Overlay::resetGame(float offset) {
     m_dead = false;
     m_timeDead = 0.f;
+    m_pathsAvailable = {false, false, false, false};
     m_pathsPressing = {false, false, false, false};
     m_killablePaths = {false, false, false, false};
 
+    m_ded->stopAllActions();
+    m_ded->runAction(CCEaseSineInOut::create(CCFadeTo::create(0.05f, 0)));
+
     for (auto node : m_nodes) {
-        node->setPositionY(node->getFrame() / 4.f * getSetting<"speed", float>() + node->getContentHeight() + 40.5f - offset * 60.f);
+        node->setPositionY(node->getFrame() / 4.f * getSetting<"speed", float>() + node->getContentHeight() + 40.5f - offset * (60.f * getSetting<"speed", float>()));
     }
 }
 
@@ -372,10 +389,45 @@ void Overlay::died() {
 
     m_dead = true;
 
-
+    m_ded->stopAllActions();
+    m_ded->runAction(CCEaseSineInOut::create(CCFadeTo::create(0.25f, 17)));
 }
 
 void Overlay::setOpacity(GLubyte opacity) {
     CCLayerColor::setOpacity(opacity);
     m_gradient->setOpacity(opacity);
+}
+
+void Overlay::completed() {
+    if (m_completed) {
+        return;
+    }
+
+    m_completed = true;
+
+    this->setID("");
+
+    this->runAction(CCSequence::create(
+        CCFadeTo::create(1.f, 0),
+        CallFuncExt::create([this] {
+            this->removeFromParent();
+        }),
+        nullptr
+    ));
+    this->fadeOut(this);
+
+    for (auto particle : m_particles) {
+        particle->setVisible(false);
+    }
+}
+
+void Overlay::fadeOut(CCNode* node) {
+    for (auto child : node->getChildrenExt<CCNodeRGBA*>()) {
+        if (typeinfo_cast<CCNodeRGBA*>(child) || typeinfo_cast<CCLayerRGBA*>(child)) {
+            child->stopAllActions();
+            child->runAction(CCFadeTo::create(1.f, 0));
+        }
+
+        this->fadeOut(child);
+    }
 }

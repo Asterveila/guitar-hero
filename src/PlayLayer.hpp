@@ -12,13 +12,19 @@ class $modify(ProPlayLayer, PlayLayer) {
         Overlay* overlay = nullptr;
         bool started = false;
         bool dontIgnore = false;
+        bool completed = false;
     };
 
-    void startGuitarHero();
+    static void onModify(auto& self) {
+        (void)self.setHookPriorityPre("PlayLayer::destroyPlayer", Priority::Last + 21903809);
+    }
+
+    void startGuitarHero(bool = true);
 
     $override
     void setupHasCompleted();
     void resetLevel();
     void destroyPlayer(PlayerObject*, GameObject*);
+    void postUpdate(float);
 
 };

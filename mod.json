@@ -14,6 +14,11 @@
 	"dependencies": {
 		"cvolton.level-id-api": ">=2.0.0"
 	},
+	"resources": {
+		"sprites": [
+			"resources/icon.png"
+		]
+	},
 	"settings": {
 		"overlay-opacity": {
 			"name": "Overlay Background Opacity",
@@ -29,7 +34,7 @@
 		"speed": {
 			"name": "Note Speed",
 			"type": "float",
-			"default": 1.0
+			"default": 3.5
 		},
 		"blue-key": {
 			"type": "keybind",
@@ -50,6 +55,18 @@
 			"type": "keybind",
 			"name": "Green Key",
 			"default": "K"
+		},
+		"only-once": {
+			"name": "Only Start Once",
+			"description": "When u start a game and then re enter the level it wont be started anymore",
+			"type": "bool",
+			"default": false
+		},
+		"seed-offset": {
+			"name": "Seed Offset",
+			"type": "int",
+			"description": "If u change this the inputs will change their path order",
+			"default": 0
 		}
 	}
 }

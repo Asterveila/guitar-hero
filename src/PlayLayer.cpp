@@ -3,16 +3,22 @@
 
 #include <gdr_convert.hpp>
 
-void ProPlayLayer::startGuitarHero() {
+void ProPlayLayer::startGuitarHero(bool resume) {
     auto f = m_fields.self();
     
     if (!f->overlay || !Mod::get()->hasSavedValue(numToString(EditorIDs::getID(m_level)))) {
         return;
     }
 
-    if (auto scene = CCScene::get()) {
-        if (auto pause = scene->getChildByType<PauseLayer>(0)) {
-            pause->onRestartFull(nullptr);
+    if (!getSetting<"only-once", bool>()) {
+        Mod::get()->setSavedValue(numToString(EditorIDs::getID(m_level)) + "-started", true);
+    }
+
+    if (resume) {
+        if (auto scene = CCScene::get()) {
+            if (auto pause = scene->getChildByType<PauseLayer>(0)) {
+                pause->onRestartFull(nullptr);
+            }
         }
     }
 
@@ -53,7 +59,7 @@ void ProPlayLayer::startGuitarHero() {
         inputs = importRes.unwrap().inputs;
     }
 
-    f->overlay->loadGame(inputs);
+    f->overlay->loadGame(inputs, !resume ? m_gameState.m_levelTime : 0.f);
     f->started = true;
 }
 
@@ -66,12 +72,26 @@ void ProPlayLayer::setupHasCompleted() {
     f->overlay->setID("overlay"_spr);
 
     this->insertBefore(f->overlay, m_percentageLabel);
+
+    if (!getSetting<"only-once", bool>() && Mod::get()->getSavedValue<bool>(numToString(EditorIDs::getID(m_level)) + "-started")) {
+        this->startGuitarHero();
+    } else if (getSetting<"only-once", bool>()) {
+        Mod::get()->getSaveContainer().erase(numToString(EditorIDs::getID(m_level)) + "-started");
+    }
 }
 
 void ProPlayLayer::resetLevel() {
     PlayLayer::resetLevel();
 
-    if (auto overlay = m_fields->overlay) {
+    auto f = m_fields.self();
+
+    if (f->completed && Mod::get()->getSavedValue<bool>(numToString(EditorIDs::getID(m_level)) + "-started")) {
+        this->startGuitarHero();
+    }
+
+    f->completed = false;
+
+    if (auto overlay = f->overlay) {
         overlay->resetGame(m_gameState.m_levelTime);
     }
 }
@@ -81,7 +101,27 @@ void ProPlayLayer::destroyPlayer(PlayerObject* p0, GameObject* p1) {
 
     auto f = m_fields.self();
 
-    if (p1 != m_anticheatSpike && f->overlay && p0->isVanillaPlayer()) {
+    if (p0->isVanillaPlayer() && p1 != m_anticheatSpike && f->overlay) {
         f->overlay->died();
+    }
+}
+
+void ProPlayLayer::postUpdate(float dt) {
+    PlayLayer::postUpdate(dt);
+
+    auto f = m_fields.self();
+
+    if (f->started && f->overlay) {
+        f->overlay->update(dt);
+
+        if (m_levelEndAnimationStarted && !f->completed) {
+            f->overlay->completed();
+            f->completed = true;
+
+            f->overlay = Overlay::create(this);
+            f->overlay->setID("overlay"_spr);
+
+            this->insertBefore(f->overlay, m_percentageLabel);
+        }
     }
 }

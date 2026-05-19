@@ -1,5 +1,6 @@
 #include "GamerPopup.hpp"
 #include "PlayLayer.hpp"
+#include "Overlay.hpp"
 
 #include <Geode/ui/GeodeUI.hpp>
 
@@ -36,15 +37,38 @@ bool GamerPopup::init() {
 
     m_mainLayer->addChild(btn);
 
-    auto btnSpr = ButtonSprite::create("Start");
+    bool end = false;
+
+    if (auto pl = static_cast<ProPlayLayer*>(PlayLayer::get())) {
+        end = pl->m_fields->started;
+    }
+
+    auto btnSpr = ButtonSprite::create(end ? "Stop" : "Start");
     btnSpr->setCascadeOpacityEnabled(true);
 
-    m_startBtn = Button::createWithNode(btnSpr, [this](Button*) {
-        if (auto pl = PlayLayer::get()) {
+    m_startBtn = Button::createWithNode(btnSpr, [this, end](Button*) {
+        if (auto pl = static_cast<ProPlayLayer*>(PlayLayer::get())) {
             this->onClose(nullptr);
 
-            queueInMainThread([pl] {
-                static_cast<ProPlayLayer*>(pl)->startGuitarHero();
+            queueInMainThread([this, self = Ref(this), pl = Ref(pl), end] {
+                if (end) {
+                    auto f = pl->m_fields.self();
+                  
+                    if (f->overlay && f->started) {
+                        f->overlay->setVisible(false);
+                        f->started = false;
+                    
+                        auto popup = GamerPopup::create(m_id);
+                        popup->m_noElasticity = true;
+                        popup->show();
+                    }
+
+                    Mod::get()->setSavedValue(numToString(EditorIDs::getID(pl->m_level)) + "-started", false);
+                    
+                    return;
+                }
+
+                pl->startGuitarHero();
             });
         }
     });
@@ -108,6 +132,14 @@ bool GamerPopup::init() {
                     this->updateButton();
                     m_nameLbl->setString(string::pathToString(path.filename()).c_str());
                     m_nameLbl->limitLabelWidth(126, 0.43f, 0.f);
+
+                    if (auto pl = static_cast<ProPlayLayer*>(PlayLayer::get())) {
+                        if (auto overlay = pl->m_fields->overlay) {
+                            if (pl->m_fields->started) {
+                                pl->startGuitarHero(false);
+                            }
+                        }
+                    }
                 }
             }
         });
