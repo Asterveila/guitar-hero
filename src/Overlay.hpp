@@ -17,9 +17,9 @@ private:
     std::array<bool, 4> m_killablePaths;
     std::array<bool, 4> m_pathsPressing;
     std::array<CCPoint, 4> m_pathPositions;
-    std::array<CCParticleSystemQuad*, 4> m_particles;
+    std::array<CCParticleSystemQuad*, 4> m_particles = {nullptr, nullptr, nullptr, nullptr};
     std::array<Path*, 4> m_paths;
-    std::array<InputNode*, 4> m_hitButtons;
+    std::array<InputNode*, 4> m_hitButtons = {nullptr, nullptr, nullptr, nullptr};
     std::vector<InputNode*> m_nodes;
 
     bool m_dead = false;
@@ -31,6 +31,7 @@ private:
     bool init() override;
 
     void fadeOut(CCNode*);
+    void initButtons();
 
 public:
 

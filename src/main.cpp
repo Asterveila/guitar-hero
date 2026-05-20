@@ -29,6 +29,30 @@ $on_mod(Loaded) {
         }
     });
 
+    listenForSettingChanges<std::string>("note-style", [](std::string) {
+        if (auto pl = static_cast<ProPlayLayer*>(PlayLayer::get())) {
+            if (auto overlay = pl->m_fields->overlay) {
+                if (pl->m_fields->started) {
+                    queueInMainThread([pl = Ref(pl)] {
+                        pl->startGuitarHero(false);
+                    });
+                }
+            }
+        }
+    });
+
+    listenForSettingChanges<int>("click-threshold", [](int) {
+        if (auto pl = static_cast<ProPlayLayer*>(PlayLayer::get())) {
+            if (auto overlay = pl->m_fields->overlay) {
+                if (pl->m_fields->started) {
+                    queueInMainThread([pl = Ref(pl)] {
+                        pl->startGuitarHero(false);
+                    });
+                }
+            }
+        }
+    });
+
 }
 
 class $modify(PauseLayer) {

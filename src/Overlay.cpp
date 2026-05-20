@@ -103,73 +103,7 @@ bool Overlay::init() {
     this->addChild(gradient);
     this->addChild(CCLayerColor::create({10, 10, 13, 255}, winSize.width, 7));
 
-    auto node = InputNode::create(ccColor3B{ 46, 154, 197 }, 17.f);
-    node->setAnchorPoint({0.5f, 0.5f});
-    node->setScaleY(-1);
-    node->setPosition(m_paths[0]->convertToWorldSpace({0, 0}) + CCPoint{m_paths[0]->getContentWidth() / 2.f, 49});
-
-    this->addChild(node, 2);
-
-    m_hitButtons[0] = node;
-
-    particle = GameToolbox::particleFromString("20a-1a0.26a0.26a18a90a43a77a0a11a0a0a0a0a0a0a0a2a1a0a0a0.160784a0a0.67451a0a1a0a1a0a0a1a0a0a0.160784a0a0.67451a0a1a0a1a0a0a0a0a0a0a0a0a0a0a0a0a2a1a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0", nullptr, false);
-    particle->setPosition(node->getPosition() - CCPoint{0, 0.5f});
-    particle->stopSystem();
-
-    this->addChild(particle);
-
-    m_particles[0] = particle;
-
-    node = InputNode::create(ccColor3B{ 197, 169, 46 }, 17.f);
-    node->setAnchorPoint({0.5f, 0.5f});
-    node->setScaleY(-1);
-    node->setPosition(m_paths[1]->convertToWorldSpace({0, 0}) + CCPoint{m_paths[1]->getContentWidth() / 2.f, 49});
-
-    this->addChild(node, 2);
-
-    m_hitButtons[1] = node;
-
-    particle = GameToolbox::particleFromString("20a-1a0.26a0.26a18a90a43a77a0a11a0a0a0a0a0a0a0a2a1a0a0a1a0a0.894118a0a0.160784a0a1a0a0a1a0a0a1a0a0.894118a0a0.160784a0a1a0a0a0a0a0a0a0a0a0a0a0a0a2a1a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0", nullptr, false);
-    particle->setPosition(node->getPosition() - CCPoint{0, 0.5f});
-    particle->stopSystem();
-
-    this->addChild(particle);
-
-    m_particles[1] = particle;
-
-    node = InputNode::create(ccColor3B{ 197, 46, 46 }, 17.f);
-    node->setAnchorPoint({0.5f, 0.5f});
-    node->setScaleY(-1);
-    node->setPosition(m_paths[2]->convertToWorldSpace({0, 0}) + CCPoint{m_paths[2]->getContentWidth() / 2.f, 49});
-
-    this->addChild(node, 2);
-
-    m_hitButtons[2] = node;
-
-    particle = GameToolbox::particleFromString("20a-1a0.26a0.26a18a90a43a77a0a11a0a0a0a0a0a0a0a2a1a0a0a1a0a0.168627a0a0.160784a0a1a0a0a1a0a0a1a0a0.168627a0a0.160784a0a1a0a0a0a0a0a0a0a0a0a0a0a0a2a1a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0", nullptr, false);
-    particle->setPosition(node->getPosition() - CCPoint{0, 0.5f});
-    particle->stopSystem();
-
-    this->addChild(particle);
-
-    m_particles[2] = particle;
-
-    node = InputNode::create(ccColor3B{ 76, 197, 46 }, 17.f);
-    node->setAnchorPoint({0.5f, 0.5f});
-    node->setScaleY(-1);
-    node->setPosition(m_paths[3]->convertToWorldSpace({0, 0}) + CCPoint{m_paths[3]->getContentWidth() / 2.f, 49});
-
-    this->addChild(node, 2);
-
-    m_hitButtons[3] = node;
-
-    particle = GameToolbox::particleFromString("20a-1a0.26a0.26a18a90a43a77a0a11a0a0a0a0a0a0a0a2a1a0a0a0.160784a0a1a0a0.207843a0a1a0a0a1a0a0a0.160784a0a1a0a0.207843a0a1a0a0a0a0a0a0a0a0a0a0a0a0a2a1a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0", nullptr, false);
-    particle->setPosition(node->getPosition() - CCPoint{0, 0.5f});
-    particle->stopSystem();
-
-    this->addChild(particle);
-
-    m_particles[3] = particle;
+    this->initButtons();
 
     for (const auto& [key, path] : std::array<std::pair<std::string, int>, 4>{
         std::pair{"blue-key", 0},
@@ -323,6 +257,8 @@ void Overlay::loadGame(const std::vector<gdr::Input<>>& inputs, float offset) {
 
     m_nodes.clear();
 
+    this->initButtons();
+
     auto seed = EditorIDs::getID(m_playLayer->m_level) + inputs.size() + getSetting<"seed-offset", int>();
 
     this->setVisible(true);
@@ -365,15 +301,17 @@ void Overlay::loadGame(const std::vector<gdr::Input<>>& inputs, float offset) {
 
         if (down) {
             pressFrame = input.frame;
-        } else {
-            if (pressFrame.has_value()) {
-                cleanInputs.push_back({
-                    .frame = *pressFrame,
-                    .duration = input.frame - *pressFrame
-                });
+        } else if (pressFrame.has_value()) {
+            cleanInputs.push_back({
+                .frame = *pressFrame,
+                .duration = input.frame - *pressFrame
+            });
 
-                pressFrame.reset();
+            if (cleanInputs.back().duration / 240.f * 1000 < getSetting<"click-threshold", int>()) {
+                cleanInputs.back().duration = 0;
             }
+
+            pressFrame.reset();
         }
 
         prevDown = down;
@@ -408,7 +346,7 @@ void Overlay::resetGame(float offset) {
     m_ded->runAction(CCEaseSineInOut::create(CCFadeTo::create(0.05f, 0)));
 
     for (auto node : m_nodes) {
-        node->setPositionY(node->getFrame() / 4.f * getSetting<"speed", float>() + node->getContentHeight() + 40.5f - offset * (60.f * getSetting<"speed", float>()));
+        node->setPositionY(node->getFrame() / 4.f * getSetting<"speed", float>() + node->getContentHeight() + 49.f - (getSetting<"note-style", std::string>() == "Circle" ? 11.6f : 8.5f) - offset * (60.f * getSetting<"speed", float>()));
     }
 }
 
@@ -468,4 +406,86 @@ void Overlay::fadeOut(CCNode* node) {
 
         this->fadeOut(child);
     }
+}
+
+void Overlay::initButtons() {
+    for (auto node : m_hitButtons) {
+        if (node) {
+            node->removeFromParent();
+        }
+    }
+    
+    for (auto particle : m_particles) {
+        if (particle) {
+            particle->removeFromParent();
+        }
+    }
+
+    auto node = InputNode::create(ccColor3B{ 46, 154, 197 }, 17.f);
+    node->setAnchorPoint({0.5f, 0.5f});
+    node->setScaleY(-1);
+    node->setPosition(m_paths[0]->convertToWorldSpace({0, 0}) + CCPoint{m_paths[0]->getContentWidth() / 2.f, 49});
+
+    this->addChild(node, 2);
+
+    m_hitButtons[0] = node;
+
+    auto particle = GameToolbox::particleFromString("20a-1a0.26a0.26a18a90a43a77a0a11a0a0a0a0a0a0a0a2a1a0a0a0.160784a0a0.67451a0a1a0a1a0a0a1a0a0a0.160784a0a0.67451a0a1a0a1a0a0a0a0a0a0a0a0a0a0a0a0a2a1a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0", nullptr, false);
+    particle->setPosition(node->getPosition() - CCPoint{0, 0.5f});
+    particle->stopSystem();
+
+    this->addChild(particle);
+
+    m_particles[0] = particle;
+
+    node = InputNode::create(ccColor3B{ 197, 169, 46 }, 17.f);
+    node->setAnchorPoint({0.5f, 0.5f});
+    node->setScaleY(-1);
+    node->setPosition(m_paths[1]->convertToWorldSpace({0, 0}) + CCPoint{m_paths[1]->getContentWidth() / 2.f, 49});
+
+    this->addChild(node, 2);
+
+    m_hitButtons[1] = node;
+
+    particle = GameToolbox::particleFromString("20a-1a0.26a0.26a18a90a43a77a0a11a0a0a0a0a0a0a0a2a1a0a0a1a0a0.894118a0a0.160784a0a1a0a0a1a0a0a1a0a0.894118a0a0.160784a0a1a0a0a0a0a0a0a0a0a0a0a0a0a2a1a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0", nullptr, false);
+    particle->setPosition(node->getPosition() - CCPoint{0, 0.5f});
+    particle->stopSystem();
+
+    this->addChild(particle);
+
+    m_particles[1] = particle;
+
+    node = InputNode::create(ccColor3B{ 197, 46, 46 }, 17.f);
+    node->setAnchorPoint({0.5f, 0.5f});
+    node->setScaleY(-1);
+    node->setPosition(m_paths[2]->convertToWorldSpace({0, 0}) + CCPoint{m_paths[2]->getContentWidth() / 2.f, 49});
+
+    this->addChild(node, 2);
+
+    m_hitButtons[2] = node;
+
+    particle = GameToolbox::particleFromString("20a-1a0.26a0.26a18a90a43a77a0a11a0a0a0a0a0a0a0a2a1a0a0a1a0a0.168627a0a0.160784a0a1a0a0a1a0a0a1a0a0.168627a0a0.160784a0a1a0a0a0a0a0a0a0a0a0a0a0a0a2a1a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0", nullptr, false);
+    particle->setPosition(node->getPosition() - CCPoint{0, 0.5f});
+    particle->stopSystem();
+
+    this->addChild(particle);
+
+    m_particles[2] = particle;
+
+    node = InputNode::create(ccColor3B{ 76, 197, 46 }, 17.f);
+    node->setAnchorPoint({0.5f, 0.5f});
+    node->setScaleY(-1);
+    node->setPosition(m_paths[3]->convertToWorldSpace({0, 0}) + CCPoint{m_paths[3]->getContentWidth() / 2.f, 49});
+
+    this->addChild(node, 2);
+
+    m_hitButtons[3] = node;
+
+    particle = GameToolbox::particleFromString("20a-1a0.26a0.26a18a90a43a77a0a11a0a0a0a0a0a0a0a2a1a0a0a0.160784a0a1a0a0.207843a0a1a0a0a1a0a0a0.160784a0a1a0a0.207843a0a1a0a0a0a0a0a0a0a0a0a0a0a0a2a1a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0", nullptr, false);
+    particle->setPosition(node->getPosition() - CCPoint{0, 0.5f});
+    particle->stopSystem();
+
+    this->addChild(particle);
+
+    m_particles[3] = particle;
 }

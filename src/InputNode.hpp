@@ -8,6 +8,8 @@ private:
 
     NineSlice* m_fg = nullptr;
     NineSlice* m_bg = nullptr;
+    CCSprite* m_half = nullptr;
+    CCSprite* m_otherHalf = nullptr;
 
     ccColor3B m_color;
 
