@@ -77,6 +77,18 @@ $on_mod(Loaded) {
         }
     });
 
+    // listenForSettingChanges<bool>("show-combo", [](bool) {
+    //     if (auto pl = static_cast<ProPlayLayer*>(PlayLayer::get())) {
+    //         if (auto overlay = pl->m_fields->overlay) {
+    //             if (pl->m_fields->started) {
+    //                 queueInMainThread([pl = Ref(pl), overlay = Ref(overlay)] {
+    //                     overlay->LABELS();
+    //                 });
+    //             }
+    //         }
+    //     }
+    // });
+
 }
 
 class $modify(PauseLayer) {

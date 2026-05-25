@@ -68,9 +68,9 @@ private:
     std::array<Path*, 4> m_paths;
     std::vector<InputNode*> m_nodes;
     std::vector<NineSlice*> m_lights = {nullptr, nullptr, nullptr, nullptr};
+    std::array<bool, 4> m_wasPressing = {false, false, false, false};
 
-    bool m_longy = false;
-    bool m_wasPressing = false;
+    int m_longy = -1;
     bool m_dead = false;
     bool m_completed = false;
     float m_timeDead = 0.f;

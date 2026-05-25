@@ -244,24 +244,26 @@ void Overlay::update(float dt) {
 
                 m_combo++;
 
-                m_longy = node->getContentHeight() > (getSetting<"note-style", std::string>() == "Circle" ? 40.f : 34.f);
+                if (node->getContentHeight() > (getSetting<"note-style", std::string>() == "Circle" ? 40.f : 34.f)) {
+                    m_longy = node->getPath();
+                }
 
                 this->updateHeheheha();
             }
         }
 
-        if (node->getPositionY() < 49.f + 2 * (getSetting<"note-style", std::string>() == "Circle" ? 11.6f : 8.5f)) {
-            m_longy = false;
+        if (m_longy == node->getPath() && node->getPositionY() < 49.f + 2 * (getSetting<"note-style", std::string>() == "Circle" ? 11.6f : 8.5f)) {
+            m_longy = -1;
         }
 
-        if (m_wasPressing && !pressing && m_longy) {
-            this->spawnThingy(node->getPath(), -1);
-            m_score -= 0.3f;
+        if (m_wasPressing[node->getPath()] && !pressing && m_longy == node->getPath()) {
+            m_score -= 0.01f;
             m_combo = 0;
+            this->spawnThingy(node->getPath(), -1);
             this->updateHeheheha();
         }
 
-        m_wasPressing = pressing;
+        m_wasPressing[node->getPath()] = pressing;
 
         node->setGlowing(shouldKill && pressing);
 
@@ -398,6 +400,8 @@ void Overlay::resetGame(float offset) {
     m_pathsAvailable = {false, false, false, false};
     m_pathsPressing = {false, false, false, false};
     m_killablePaths = {false, false, false, false};
+    m_wasPressing = {false, false, false, false};
+    m_longy = -1;
     m_combo = 0;
     m_currentAccuracy = 100.f;
     m_targetAccuracy = 100.f;
@@ -407,13 +411,6 @@ void Overlay::resetGame(float offset) {
         m_accuracyBlur->stopAllActions();
         m_accuracyBlur->setOpacity(190);
         m_accuracyLabel->setOpacity(182);
-    }
-
-    if (m_comboLabel) {
-        m_comboLabel->stopAllActions();
-        m_comboBlur->stopAllActions();
-        m_comboBlur->setOpacity(190);
-        m_comboLabel->setOpacity(182);
     }
 
     m_ded->stopAllActions();
@@ -431,7 +428,13 @@ void Overlay::resetGame(float offset) {
 
     m_currentNote = m_currentInput - 1;
 
-    m_comboLabel->setString(numToString(m_currentInput).c_str());
+    if (m_comboLabel) {
+        m_comboLabel->stopAllActions();
+        m_comboBlur->stopAllActions();
+        m_comboBlur->setOpacity(190);
+        m_comboLabel->setOpacity(182);
+        m_comboLabel->setString(numToString(m_currentInput).c_str());
+    }
 
     m_totalInputs = m_nodes.size() - m_currentNote;
     m_score = m_totalInputs;
@@ -835,7 +838,6 @@ void Overlay::spawnThingy(int path, int accuracy) {
 }
 
 void Overlay::LABELS() {
-    log::debug("wa");
     m_accuracyLabel = nullptr;
     m_comboLabel = nullptr;
 
