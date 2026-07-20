@@ -61,6 +61,8 @@ void ProPlayLayer::startGuitarHero(bool resume) {
 
     f->overlay->loadGame(inputs, !resume ? m_gameState.m_levelTime : 0.f);
     f->started = true;
+
+    setHookEnabled("PlayLayer::postUpdate", true);
 }
 
 void ProPlayLayer::setupHasCompleted() {

@@ -13,6 +13,11 @@ class $modify(ProPlayLayer, PlayLayer) {
         bool started = false;
         bool dontIgnore = false;
         bool completed = false;
+        
+        ~Fields() {
+            setHookEnabled("PlayLayer::postUpdate", false);
+        }
+
     };
 
     static void onModify(auto& self) {

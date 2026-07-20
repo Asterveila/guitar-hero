@@ -55,3 +55,12 @@ const T& getSetting() {
 
     return value;
 }
+
+static void setHookEnabled(std::string_view name, bool enabled) {
+    for (auto hook : Mod::get()->getHooks()) {
+        if (hook->getDisplayName() == name) {
+            (void)(enabled ? hook->enable() : hook->disable());
+            break;
+        }
+    }
+}

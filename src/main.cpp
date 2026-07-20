@@ -9,6 +9,8 @@
 
 $on_mod(Loaded) {
 
+    setHookEnabled("PlayLayer::postUpdate", false);
+
     listenForSettingChanges<int>("overlay-opacity", [](int value) {
         if (auto pl = static_cast<ProPlayLayer*>(PlayLayer::get())) {
             if (auto overlay = pl->m_fields->overlay) {

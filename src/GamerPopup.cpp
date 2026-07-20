@@ -27,7 +27,7 @@ void GamerPopup::updateButton() {
 bool GamerPopup::init() {
     Popup::init(264, 161);
 
-    this->setTitle("Game");
+    this->setTitle("GeoHero");
 
     auto btn = Button::createWithSpriteFrameName("GJ_optionsBtn_001.png", [](Button*) {
         geode::openSettingsPopup(Mod::get(), false);
@@ -43,7 +43,7 @@ bool GamerPopup::init() {
         end = pl->m_fields->started;
     }
 
-    auto btnSpr = ButtonSprite::create(end ? "Stop" : "Start");
+    auto btnSpr = ButtonSprite::create(end ? "Stop" : "Play");
     btnSpr->setCascadeOpacityEnabled(true);
 
     m_startBtn = Button::createWithNode(btnSpr, [this, end](Button*) {
@@ -57,6 +57,8 @@ bool GamerPopup::init() {
                     if (f->overlay && f->started) {
                         f->overlay->setVisible(false);
                         f->started = false;
+
+                        setHookEnabled("PlayLayer::postUpdate", false);
                     
                         auto popup = GamerPopup::create(m_id);
                         popup->m_noElasticity = true;
