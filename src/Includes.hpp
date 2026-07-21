@@ -56,6 +56,10 @@ const T& getSetting() {
     return value;
 }
 
+static std::string getIDString(GJGameLevel* level) {
+    return fmt::format("{}-{}", EditorIDs::getID(level), static_cast<int>(level->m_levelType));
+}
+
 static void setHookEnabled(std::string_view name, bool enabled) {
     for (auto hook : Mod::get()->getHooks()) {
         if (hook->getDisplayName() == name) {

@@ -12,9 +12,9 @@ private:
 
     Button* m_startBtn = nullptr;
     
-    int m_id;
+    GJGameLevel* m_level = nullptr;
 
-    GamerPopup(int);
+    GamerPopup(GJGameLevel*);
 
     bool init() override;
     
@@ -22,6 +22,6 @@ private:
 
 public:
 
-    static GamerPopup* create(int);
+    static GamerPopup* create(GJGameLevel*);
 
 };

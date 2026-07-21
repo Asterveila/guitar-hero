@@ -98,6 +98,12 @@ class $modify(PauseLayer) {
     void customSetup() {
         PauseLayer::customSetup();
 
+        auto menu = this->getChildByID("left-button-menu");
+
+        if (!menu) {
+            return;
+        }
+
         auto spr = CCSprite::createWithSpriteFrameName("GJ_plainBtn_001.png");
 
         auto spr2 = CCSprite::create("icon.png"_spr);
@@ -107,13 +113,14 @@ class $modify(PauseLayer) {
 
         auto btn = Button::createWithNode(spr, [](Button*) {
             if (auto pl = PlayLayer::get()) {
-                GamerPopup::create(EditorIDs::getID(pl->m_level))->show();
+                GamerPopup::create(pl->m_level)->show();
             }
         });
-        btn->setScale(0.7f);
+        btn->setScale(0.6f);
         btn->setPosition({35, 35});
 
-        this->addChild(btn);
+        menu->addChild(btn);
+        menu->updateLayout();
     }
 
 };

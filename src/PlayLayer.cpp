@@ -6,12 +6,12 @@
 void ProPlayLayer::startGuitarHero(bool resume) {
     auto f = m_fields.self();
     
-    if (!f->overlay || !Mod::get()->hasSavedValue(numToString(EditorIDs::getID(m_level)))) {
+    if (!f->overlay || !Mod::get()->hasSavedValue(getIDString(m_level))) {
         return;
     }
 
     if (!getSetting<"only-once", bool>()) {
-        Mod::get()->setSavedValue(numToString(EditorIDs::getID(m_level)) + "-started", true);
+        Mod::get()->setSavedValue(getIDString(m_level) + "-started", true);
     }
 
     if (resume) {
@@ -22,7 +22,7 @@ void ProPlayLayer::startGuitarHero(bool resume) {
         }
     }
 
-    auto path = Mod::get()->getSavedValue<std::filesystem::path>(numToString(EditorIDs::getID(m_level)));
+    auto path = Mod::get()->getSavedValue<std::filesystem::path>(getIDString(m_level));
 
     if (!std::filesystem::exists(path)) {
         return;
@@ -75,10 +75,10 @@ void ProPlayLayer::setupHasCompleted() {
 
     this->insertBefore(f->overlay, m_percentageLabel);
 
-    if (!getSetting<"only-once", bool>() && Mod::get()->getSavedValue<bool>(numToString(EditorIDs::getID(m_level)) + "-started")) {
+    if (!getSetting<"only-once", bool>() && Mod::get()->getSavedValue<bool>(getIDString(m_level) + "-started")) {
         this->startGuitarHero();
     } else if (getSetting<"only-once", bool>()) {
-        Mod::get()->getSaveContainer().erase(numToString(EditorIDs::getID(m_level)) + "-started");
+        Mod::get()->getSaveContainer().erase(getIDString(m_level) + "-started");
     }
 }
 
@@ -87,7 +87,7 @@ void ProPlayLayer::resetLevel() {
 
     auto f = m_fields.self();
 
-    if (f->completed && Mod::get()->getSavedValue<bool>(numToString(EditorIDs::getID(m_level)) + "-started")) {
+    if (f->completed && Mod::get()->getSavedValue<bool>(getIDString(m_level) + "-started")) {
         this->startGuitarHero();
     }
 

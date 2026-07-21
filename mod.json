@@ -8,11 +8,12 @@
 	},
 	"id": "zilko.geohero",
 	"name": "GeoHero",
-	"version": "v1.0.0",
+	"version": "v1.0.1",
 	"developer": "Zilko",
 	"description": "make the game feel like a real rhythm game",
 	"dependencies": {
-		"cvolton.level-id-api": ">=2.0.0"
+		"cvolton.level-id-api": ">=2.0.0",
+		"geode.node-ids": ">=1.23.3"
 	},
 	"links": {
 		"source": "https://github.com/Zilko/guitar-hero",

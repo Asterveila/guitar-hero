@@ -4,11 +4,11 @@
 
 #include <Geode/ui/GeodeUI.hpp>
 
-GamerPopup::GamerPopup(int id)
-    : m_id(id) {}
+GamerPopup::GamerPopup(GJGameLevel* level)
+    : m_level(level) {}
 
-GamerPopup* GamerPopup::create(int id) {
-    auto ret = new GamerPopup(id);
+GamerPopup* GamerPopup::create(GJGameLevel* level) {
+    auto ret = new GamerPopup(level);
 
     if (ret->init()) {
         ret->autorelease();
@@ -20,8 +20,8 @@ GamerPopup* GamerPopup::create(int id) {
 }
 
 void GamerPopup::updateButton() {
-    m_startBtn->setEnabled(Mod::get()->hasSavedValue(numToString(m_id)));
-    m_startBtn->setOpacity(Mod::get()->hasSavedValue(numToString(m_id)) ? 255 : 90);
+    m_startBtn->setEnabled(Mod::get()->hasSavedValue(getIDString(m_level)));
+    m_startBtn->setOpacity(Mod::get()->hasSavedValue(getIDString(m_level)) ? 255 : 90);
 }
 
 bool GamerPopup::init() {
@@ -60,12 +60,12 @@ bool GamerPopup::init() {
 
                         setHookEnabled("PlayLayer::postUpdate", false);
                     
-                        auto popup = GamerPopup::create(m_id);
+                        auto popup = GamerPopup::create(m_level);
                         popup->m_noElasticity = true;
                         popup->show();
                     }
 
-                    Mod::get()->setSavedValue(numToString(EditorIDs::getID(pl->m_level)) + "-started", false);
+                    Mod::get()->setSavedValue(getIDString(pl->m_level) + "-started", false);
                     
                     return;
                 }
@@ -113,8 +113,8 @@ bool GamerPopup::init() {
 
     bg->addChild(m_nameLbl);
 
-    if (Mod::get()->hasSavedValue(numToString(m_id))) {
-        auto path = std::filesystem::path(Mod::get()->getSavedValue<std::string>(numToString(m_id)));
+    if (Mod::get()->hasSavedValue(getIDString(m_level))) {
+        auto path = std::filesystem::path(Mod::get()->getSavedValue<std::string>(getIDString(m_level)));
         m_nameLbl->setString(string::pathToString(path.filename()).c_str());
         m_nameLbl->limitLabelWidth(126, 0.43f, 0.f);
     }
@@ -130,7 +130,7 @@ bool GamerPopup::init() {
             if (result.isOk()) {
                 if (auto opt = result.unwrap()) {
                     auto path = opt.value();
-                    Mod::get()->setSavedValue(numToString(m_id), path);
+                    Mod::get()->setSavedValue(getIDString(m_level), path);
                     this->updateButton();
                     m_nameLbl->setString(string::pathToString(path.filename()).c_str());
                     m_nameLbl->limitLabelWidth(126, 0.43f, 0.f);

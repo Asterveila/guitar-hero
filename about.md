@@ -3,7 +3,7 @@
 Transform you're Geometry Dash experience into a Guitar Hero inspired rhythm game!
 
 1. get a macro of the level, .gdr, .gdr.json, and .gdr2 are supported
-2. select it in the menu
+2. select it in the menu you can open in the pause menu
 3. tap play
 4. play it
 
@@ -20,6 +20,7 @@ you can modify these in settings, in mobile u just tap anywhere for any lane
 
 * The mod doesnt work with custom keybinds for some reason
 * The mod doesnt support 2 player macros or platformer mode
+* The mod doesnt support macros that hold while already holding
 * If extra / unnecessary inputs appear, its due to the macro, not the mod (possibly)
 
 #
