@@ -44,7 +44,7 @@ bool Overlay::init() {
             ->setAxisAlignment(AxisAlignment::Center)
             ->setAutoScale(false)
             ->setAutoGrowAxis(true)
-            ->setGap(30.f)
+            ->setGap(getSetting<"lane-split", float>())
             ->ignoreInvisibleChildren(false)
     );
 
@@ -501,6 +501,8 @@ void Overlay::fadeOut(CCNode* node) {
 }
 
 void Overlay::initButtons() {
+    auto sizeMult = getSetting<"note-size", float>();
+
     for (auto node : m_hitButtons) {
         if (node) {
             node->removeFromParent();
@@ -521,7 +523,8 @@ void Overlay::initButtons() {
 
     auto node = InputNode::create(ccColor3B{ 46, 154, 197 }, 17.f);
     node->setAnchorPoint({0.5f, 0.5f});
-    node->setScaleY(-1);
+    node->setScaleX(sizeMult);
+    node->setScaleY(-sizeMult);
     node->setPosition(m_paths[0]->convertToWorldSpace({0, 0}) + CCPoint{m_paths[0]->getContentWidth() / 2.f, 49});
 
     this->addChild(node, 2);
@@ -529,8 +532,7 @@ void Overlay::initButtons() {
     m_hitButtons[0] = node;
 
     auto light = NineSlice::create("blur.png"_spr);
-    light->setContentSize(getSetting<"note-style", std::string>() == "Circle" ? CCSize{35, 35} : CCSize{39, 30});
-    light->setPosition(node->getPosition() + CCPoint{0, getSetting<"note-style", std::string>() == "Circle" ? -1.5f : 0.f});
+    light->setContentSize((getSetting<"note-style", std::string>() == "Circle" ? CCSize{35, 35} : CCSize{39, 30}) * sizeMult);    light->setPosition(node->getPosition() + CCPoint{0, getSetting<"note-style", std::string>() == "Circle" ? -1.5f : 0.f});
     light->setOpacity(0);
 
     this->addChild(light, 2);
@@ -547,7 +549,8 @@ void Overlay::initButtons() {
 
     node = InputNode::create(ccColor3B{ 197, 169, 46 }, 17.f);
     node->setAnchorPoint({0.5f, 0.5f});
-    node->setScaleY(-1);
+    node->setScaleX(sizeMult);
+    node->setScaleY(-sizeMult);
     node->setPosition(m_paths[1]->convertToWorldSpace({0, 0}) + CCPoint{m_paths[1]->getContentWidth() / 2.f, 49});
 
     this->addChild(node, 2);
@@ -555,8 +558,7 @@ void Overlay::initButtons() {
     m_hitButtons[1] = node;
 
     light = NineSlice::create("blur.png"_spr);
-    light->setContentSize(getSetting<"note-style", std::string>() == "Circle" ? CCSize{35, 35} : CCSize{39, 30});
-    light->setPosition(node->getPosition() + CCPoint{0, getSetting<"note-style", std::string>() == "Circle" ? -1.5f : 0.f});
+    light->setContentSize((getSetting<"note-style", std::string>() == "Circle" ? CCSize{35, 35} : CCSize{39, 30}) * sizeMult);    light->setPosition(node->getPosition() + CCPoint{0, getSetting<"note-style", std::string>() == "Circle" ? -1.5f : 0.f});
     light->setOpacity(0);
 
     this->addChild(light, 2);
@@ -573,7 +575,8 @@ void Overlay::initButtons() {
 
     node = InputNode::create(ccColor3B{ 197, 46, 46 }, 17.f);
     node->setAnchorPoint({0.5f, 0.5f});
-    node->setScaleY(-1);
+    node->setScaleX(sizeMult);
+    node->setScaleY(-sizeMult);
     node->setPosition(m_paths[2]->convertToWorldSpace({0, 0}) + CCPoint{m_paths[2]->getContentWidth() / 2.f, 49});
 
     this->addChild(node, 2);
@@ -581,8 +584,7 @@ void Overlay::initButtons() {
     m_hitButtons[2] = node;
 
     light = NineSlice::create("blur.png"_spr);
-    light->setContentSize(getSetting<"note-style", std::string>() == "Circle" ? CCSize{35, 35} : CCSize{39, 30});
-    light->setPosition(node->getPosition() + CCPoint{0, getSetting<"note-style", std::string>() == "Circle" ? -1.5f : 0.f});
+    light->setContentSize((getSetting<"note-style", std::string>() == "Circle" ? CCSize{35, 35} : CCSize{39, 30}) * sizeMult);    light->setPosition(node->getPosition() + CCPoint{0, getSetting<"note-style", std::string>() == "Circle" ? -1.5f : 0.f});
     light->setOpacity(0);
 
     this->addChild(light, 2);
@@ -599,7 +601,8 @@ void Overlay::initButtons() {
 
     node = InputNode::create(ccColor3B{ 76, 197, 46 }, 17.f);
     node->setAnchorPoint({0.5f, 0.5f});
-    node->setScaleY(-1);
+    node->setScaleX(sizeMult);
+    node->setScaleY(-sizeMult);
     node->setPosition(m_paths[3]->convertToWorldSpace({0, 0}) + CCPoint{m_paths[3]->getContentWidth() / 2.f, 49});
 
     this->addChild(node, 2);
@@ -607,8 +610,7 @@ void Overlay::initButtons() {
     m_hitButtons[3] = node;
 
     light = NineSlice::create("blur.png"_spr);
-    light->setContentSize(getSetting<"note-style", std::string>() == "Circle" ? CCSize{35, 35} : CCSize{39, 30});
-    light->setPosition(node->getPosition() + CCPoint{0, getSetting<"note-style", std::string>() == "Circle" ? -1.5f : 0.f});
+    light->setContentSize((getSetting<"note-style", std::string>() == "Circle" ? CCSize{35, 35} : CCSize{39, 30}) * sizeMult);    light->setPosition(node->getPosition() + CCPoint{0, getSetting<"note-style", std::string>() == "Circle" ? -1.5f : 0.f});
     light->setOpacity(0);
 
     this->addChild(light, 2);

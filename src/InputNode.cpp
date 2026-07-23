@@ -82,6 +82,8 @@ bool InputNode::init(float height) {
     this->setAnchorPoint({0.5f, 1.f});
     this->setContentSize({m_bg->getContentWidth(), height});
 
+    this->setScale(getSetting<"note-size", float>());
+
     return true;
 }
 

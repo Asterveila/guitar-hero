@@ -50,6 +50,24 @@
 			"default": "Circle",
 			"one-of": ["Rounded Square", "Circle", "Square"]
 		},
+		"note-size": {
+		    "name": "Note Size",
+		    "description": "Visually scales notes and the input area. Doesn't affect hitboxes or timing.",
+		    "type": "float",
+		    "default": 1.0,
+		    "min": 0.5,
+		    "max": 2.0,
+		    "control": { "slider": true }
+		},
+		"lane-split": {
+		    "name": "Lane Split",
+		    "description": "Spacing between lanes",
+		    "type": "float",
+		    "default": 30.0,
+		    "min": 0.0,
+		    "max": 100.0,
+		    "control": { "slider": true }
+		},
 		"click-threshold": {
 			"name": "Click Input Threshold (ms)",
 			"description": "Holds shorter than the threshold will be considered a click, 0 for normal behavior",
